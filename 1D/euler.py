@@ -21,6 +21,16 @@ def prim_to_cons_var(rho,u,P):
 
     return mass,mom,energy
 
+def prim_to_cons_var2D(rho,u,v,P):
+
+    mass = rho
+    mom_x = rho * u
+    mom_y = rho * v
+    kinetic_energy = 0.5 * rho * (u**2 + v**2)
+    internal_energy = P / (gamma - 1)
+    energy = kinetic_energy + internal_energy
+
+    return mass, mom_x, mom_y, energy
 
 def cons_to_prim(a_cons):
 

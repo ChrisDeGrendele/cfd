@@ -2,8 +2,6 @@ from constants import*
 import numpy as np
 
 def hllc_flux(q_left, q_right, gamma):
-    # Calculate wave speeds (S_L, S_R, and S_M)
-    # This is a simplified example; actual calculation depends on the problem specifics
     S_L = min(q_left[UCOMP], q_right[UCOMP]) - max(np.sqrt(gamma * q_left[PCOMP] / q_left[RHOCOMP]), np.sqrt(gamma * q_right[PCOMP] / q_right[RHOCOMP]))
     S_R = max(q_left[UCOMP], q_right[UCOMP]) + max(np.sqrt(gamma * q_left[PCOMP] / q_left[RHOCOMP]), np.sqrt(gamma * q_right[PCOMP] / q_right[RHOCOMP]))
     rho_L = q_left[RHOCOMP]

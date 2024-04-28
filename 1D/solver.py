@@ -295,6 +295,122 @@ def weno5solve(grid, t0, t_finish,cfl, nt):
     return grid
 
 
+def seSolve(grid, t0, t_finish,cfl, nt):
+
+    timestepNum = 0
+    t = t0
+
+
+    os.makedirs('simulation_frames', exist_ok=True)
+
+
+    while (t < t_finish) and timestepNum < nt:
+        print("Timestep: " , timestepNum, "  Current time: ", t)
+        #F = flux(grid)
+
+        # Plotting each variable in a separate subplot
+        fig, axs = plt.subplots(3, 1, figsize=(10, 15))
+        grid.apply_zero_gradient_bcs()
+
+        axs[0].plot(grid.grid[RHOCOMP, :], label='Density')
+        axs[0].set_title(f'Density at Time: {t:.2f}')
+        axs[0].legend()
+
+        axs[1].plot(grid.grid[UCOMP, :], label='Velocity')
+        axs[1].set_title(f'Velocity at Time: {t:.2f}')
+        axs[1].legend()
+
+        axs[2].plot(grid.grid[PCOMP, :], label='Pressure')
+        axs[2].set_title(f'Pressure at Time: {t:.2f}')
+        axs[2].legend()
+
+        for ax in axs:
+            ax.set_xlabel('Grid')
+            ax.set_ylabel('Value')
+
+        # Save the figure
+        plt.savefig(f'simulation_frames/frame_{timestepNum:04d}.png')
+        plt.close(fig)  # Close the figure to free memory
+        uPrim = grid.grid
+        grid.assert_variable_type("prim")
+        a = np.sqrt(gamma * grid.grid[PCOMP] / grid.grid[RHOCOMP])
+        max_speed = np.max(np.abs(grid.grid[UCOMP]) + a)
+        dt = min(cfl * grid.dx / max_speed, t_finish - t)
+        primP = weno5_plus(grid.grid,grid)
+        #primM = weno5_minus(grid.grid,grid)
+
+        mass,mom,energy = prim_to_cons_var(primP[RHOCOMP], primP[UCOMP], primP[PCOMP])
+        consP = np.array([mass,mom,energy])
+        #consM = flux_var(primM[0], primM[1], primM[2])
+
+
+        #fL = flux_var(primM[RHOCOMP], primM[UCOMP], primM[PCOMP])
+        fR = flux_var(primP[RHOCOMP], primP[UCOMP], primP[PCOMP])
+
+
+
+
+        #char_vars, right_eigenvectors_list = prim_to_char(grid.grid)
+        #assert(np.shape(char_vars) == np.shape(grid.grid))
+        #grid.set(char_vars)
+        #grid.variables = "char"
+
+
+        U = grid.grid  # conservative variables
+        U_new = np.ones_like(U)/0 #np.nans_like lol
+        LFFlux = np.zeros_like(U_new)
+
+        #Loop through all the cells except for the outermost ghost cells.
+        for i in range(1, len(grid.x)-1):
+            for icomp in range(NUMQ):
+                # Compute the Lax-Friedrichs flux at i+1/2 and i-1/2 interfaces
+
+                LFFlux[icomp, i] = 0.5*(fR[icomp,i+1] + fR[icomp,i]) - 0.5*max_speed*(consP[icomp,i+1] - consP[icomp,i])
+
+        # plt.plot(LFFlux[0],'.')
+        # plt.plot(LFFlux[1],'.')
+        # plt.plot(LFFlux[2],'.')
+        # plt.show()
+
+        for i in range(grid.Nghost, grid.Nx + grid.Nghost):
+            for icomp in range(NUMQ):
+
+                # # Update the conserved variables using the net flux difference
+                U_new[icomp, i] = consP[icomp,i] - (dt / grid.dx) * (LFFlux[icomp,i]- LFFlux[icomp,i-1])
+
+
+
+        grid.set(U_new) 
+        grid.apply_zero_gradient_bcs()
+
+        grid.transform(cons_to_prim, "prim")
+        grid.apply_zero_gradient_bcs()
+
+        #prim_vars = char_to_prim(grid.grid,right_eigenvectors_list)
+        #grid.set(prim_vars)
+        #grid.variables = "prim"
+  
+
+
+        for i in range(len(grid.grid[0])):
+           
+            if (grid.grid[PCOMP,i] <= 0):
+               print("Bad cell: ", i)
+               assert(False)
+            
+            for icomp in range(NUMQ):
+                if np.isnan(grid.grid[icomp,i]):
+                   print("Nan cell : ", i)
+                   assert(False)
+
+        
+        t += dt
+        timestepNum += 1
+    
+
+    os.system("ffmpeg -r 30 -f image2 -i simulation_frames/frame_%04d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p simulation.mp4")
+    return grid
+
 def LF1(grid, t0, t_finish,cfl, nt):
 
     timestepNum = 0
