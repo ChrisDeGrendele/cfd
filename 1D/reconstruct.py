@@ -13,6 +13,7 @@ def weno5_reconstruction(U, grid):
 
 def SEDAS_apriori(U, grid):
     r_gp = 2
+    
 
     Uphalf = np.zeros_like(U)
 

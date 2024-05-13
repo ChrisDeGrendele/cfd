@@ -9,10 +9,12 @@ class Grid1D:
         self.dx = (xlim[1]-xlim[0])/(Nx-1)
         self.x = np.linspace(xlim[0] - self.dx*Nghost, xlim[1] + self.dx*Nghost, Nx + 2*Nghost)
         self.ndim = 1
+
+
         #internal x (no ghost cells)
         self.x_int = self.x[self.Nghost:self.Nx+self.Nghost]
 
-        self.grid = np.zeros((len(self.x), NumVariables))
+        self.grid = np.zeros((NumVariables,len(self.x)))
 
 
     def fill_grid(self, f, ivar):
@@ -30,11 +32,13 @@ class Grid1D:
         else:
             return np.zeros_like(self.grid)
 
+    def get_var_array(self, a_comp, just_internal=False):
+        if just_internal:
+            return np.zeros_like(self.grid[a_comp,self.Nghost:self.Nx+self.Nghost])
+        else:
+            return np.zeros_like(self.grid[a_comp])
 
 
-
-    # def return_internal_grid(self):
-    #     return self.grid[self.Nghost:self.Nx+self.Nghost]
 
 
 
