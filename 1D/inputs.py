@@ -42,6 +42,8 @@ class Inputs:
 
         #Method
         self.flux = self.get_config_value(config, 'Method', 'flux')
+        self.bc_lo = self.get_config_value(config, 'Method', 'bcs_lo')
+        self.bc_hi = self.get_config_value(config, 'Method', 'bcs_hi')
 
         #Output
         self.output_freq = self.get_config_value(config, 'Output', 'output_freq', type_func=int,  mandatory=False, default=1)

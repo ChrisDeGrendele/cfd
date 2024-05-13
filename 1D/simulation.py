@@ -3,15 +3,10 @@ from grid import Grid1D
 
 class Simulation:
 
-    def __init__(self, a_xlim, a_nx, a_numghost):
-        cfl = .5
-        t_finish = 0.1
-        t0 = 0.0
-        Nt = np.inf
-        timestepNum = 0
-        t = t0
+    def __init__(self, a_inputs):
+        self.inputs = a_inputs
 
-        self.grid = Grid1D(a_xlim, a_nx, a_numghost, NUMQ)
+        self.grid = Grid1D(self.inputs.xlim, self.inputs.nx, self.inputs.numghosts, NUMQ)
 
     def run(self):
 
@@ -19,12 +14,12 @@ class Simulation:
         self.grid.apply_zero_gradient_bcs()
 
 
-        os.makedirs('simulation_frames', exist_ok=True)
+        #os.makedirs('simulation_frames', exist_ok=True)
 
 
         while (t < t_finish) and timestepNum < Nt:
 
-            
+
             print("Timestep: " , timestepNum, "  Current time: ", t)
             
             grid_weno.apply_zero_gradient_bcs()
