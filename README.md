@@ -1,4 +1,2 @@
+[![CI Testing](https://github.com/ChrisDeGrendele/cfd/actions/workflows/ci.yaml/badge.svg)](https://github.com/ChrisDeGrendele/cfd/actions/workflows/ci.yaml)
 <h1 align='center'>CFD</h1>
-
-
-![Python application test](https://github.com/ChrisDeGrendele/github/actions/workflows/ci.yaml/badge.svg)
