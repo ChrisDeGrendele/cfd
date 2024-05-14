@@ -8,10 +8,13 @@ class Simulation:
 
         self.grid = Grid1D(self.inputs.xlim, self.inputs.nx, self.inputs.numghosts, NUMQ)
 
-    def run(self):
-
         self.grid.fill_grid(ics.sod_shock_tube)
+        
         self.grid.apply_zero_gradient_bcs()
+
+
+
+    def run(self):
 
 
         #os.makedirs('simulation_frames', exist_ok=True)
@@ -22,7 +25,7 @@ class Simulation:
 
             print("Timestep: " , timestepNum, "  Current time: ", t)
             
-            grid_weno.apply_zero_gradient_bcs()
+            self.grid.apply_zero_gradient_bcs()
 
             if makeMovie:
                 fig, axs = plt.subplots(4, 1, figsize=(10, 15))
