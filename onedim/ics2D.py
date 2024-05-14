@@ -1,10 +1,11 @@
 from constants2D import *
 import numpy as np
 
+
 def rimeann2D(meshX, meshY, var):
     values = np.zeros_like(meshX)
 
-    #ref: https://www.csun.edu/~jb715473/examples/euler2d.htm
+    # ref: https://www.csun.edu/~jb715473/examples/euler2d.htm
 
     # Define conditions for each quadrant based on position
     # Quadrant 1: top-left

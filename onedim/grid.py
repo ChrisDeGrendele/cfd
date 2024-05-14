@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from constants import *
 
+
 class Grid1D:
     def __init__(self, xlim, Nx, Nghost, num_vars):
         self.xlim = xlim
@@ -9,26 +10,28 @@ class Grid1D:
         self.Nghost = Nghost
         self.num_vars = num_vars  # Number of variables (e.g., 3 for Euler equations)
         self.dx = (xlim[1] - xlim[0]) / (Nx - 1)
-        self.x = np.linspace(xlim[0] - self.dx*Nghost, xlim[1] + self.dx*Nghost, Nx + 2*Nghost)
+        self.x = np.linspace(
+            xlim[0] - self.dx * Nghost, xlim[1] + self.dx * Nghost, Nx + 2 * Nghost
+        )
         self.ndim = 1
         # Internal x (no ghost cells)
-        self.x_int = self.x[self.Nghost:self.Nx + self.Nghost]
+        self.x_int = self.x[self.Nghost : self.Nx + self.Nghost]
         # Initialize the grid for multiple variables
-        self.grid = np.zeros((num_vars, Nx + 2*Nghost))
+        self.grid = np.zeros((num_vars, Nx + 2 * Nghost))
         self.variables = "prim"
 
         self.shock_mask = np.zeros_like(self.x)
 
     def fill_grid(self, f):
         for var in range(self.num_vars):
-            self.grid[var, self.Nghost:self.Nx + self.Nghost] = f(self.x_int,var)
+            self.grid[var, self.Nghost : self.Nx + self.Nghost] = f(self.x_int, var)
 
     def plot(self):
         fig, axs = plt.subplots(self.num_vars, 1, figsize=(10, self.num_vars * 3))
         if self.num_vars == 1:
             axs = [axs]  # Make it iterable
         for var in range(self.num_vars):
-            axs[var].plot(self.x, self.grid[var, :],'.')
+            axs[var].plot(self.x, self.grid[var, :], ".")
             axs[var].set_title(variable_names[var])
         plt.tight_layout()
         plt.show()
@@ -36,72 +39,82 @@ class Grid1D:
     def apply_periodic_bcs(self):
         for var in range(self.num_vars):
             for i in range(self.Nghost):
-                self.grid[var, i] = self.grid[var, self.Nx + self.Nghost - (self.Nghost-i)]
-                self.grid[var, self.Nx + self.Nghost + i] = self.grid[var, self.Nghost + i]
-            
+                self.grid[var, i] = self.grid[
+                    var, self.Nx + self.Nghost - (self.Nghost - i)
+                ]
+                self.grid[var, self.Nx + self.Nghost + i] = self.grid[
+                    var, self.Nghost + i
+                ]
+
     def apply_reflective_bcs(self):
         for var in range(self.num_vars):
             # Reflective BCs for left boundary
             if var == UCOMP:  # Assuming UCOMP is the velocity component
-                self.grid[var, :self.Nghost] = -self.grid[var, self.Nghost:2*self.Nghost][::-1]
+                self.grid[var, : self.Nghost] = -self.grid[
+                    var, self.Nghost : 2 * self.Nghost
+                ][::-1]
             else:  # For density and pressure, just copy the values from the first interior cells
-                self.grid[var, :self.Nghost] = self.grid[var, self.Nghost:2*self.Nghost]
+                self.grid[var, : self.Nghost] = self.grid[
+                    var, self.Nghost : 2 * self.Nghost
+                ]
 
             # Reflective BCs for right boundary
             if var == UCOMP:
-                self.grid[var, self.Nx + self.Nghost:] = -self.grid[var, self.Nx:self.Nx + self.Nghost][::-1]
+                self.grid[var, self.Nx + self.Nghost :] = -self.grid[
+                    var, self.Nx : self.Nx + self.Nghost
+                ][::-1]
             else:
-                self.grid[var, self.Nx + self.Nghost:] = self.grid[var, self.Nx:self.Nx + self.Nghost]
+                self.grid[var, self.Nx + self.Nghost :] = self.grid[
+                    var, self.Nx : self.Nx + self.Nghost
+                ]
 
     def apply_zero_gradient_bcs(self):
-        # 
+        #
 
         #     self.grid[var,0] = self.grid[var,1]
         #     self.grid[var,self.Nx + self.Nghost] =  self.grid[var,self.Nx]
 
-        #self.grid[UCOMP,0] = 0
-        #self.grid[UCOMP,self.Nx + self.Nghost] =  0
+        # self.grid[UCOMP,0] = 0
+        # self.grid[UCOMP,self.Nx + self.Nghost] =  0
 
         for var in range(self.num_vars):
             for ighost in range(self.Nghost):
-
-                self.grid[var,ighost] = self.grid[var,self.Nghost]
-                self.grid[var, self.Nx + self.Nghost + ighost] = self.grid[var, self.Nx + self.Nghost - 1]
-
+                self.grid[var, ighost] = self.grid[var, self.Nghost]
+                self.grid[var, self.Nx + self.Nghost + ighost] = self.grid[
+                    var, self.Nx + self.Nghost - 1
+                ]
 
     def return_internal_grid(self):
-        return self.grid[:, self.Nghost:self.Nx + self.Nghost]
-    
+        return self.grid[:, self.Nghost : self.Nx + self.Nghost]
+
     def return_grid(self):
         return self.grid
 
     def scratch_internal(self):
-        return np.zeros_like(self.grid[:, self.Nghost:self.Nx + self.Nghost])
+        return np.zeros_like(self.grid[:, self.Nghost : self.Nx + self.Nghost])
+
     def scratch(self):
         return np.zeros_like(self.grid)
 
-
-    def transform(self,f,name):
+    def transform(self, f, name):
         self.grid = f(self.grid)
         self.variables = name
 
-    def set_internal(self,U_new):
-        self.grid[:, self.Nghost:self.Nx + self.Nghost] = U_new
-        
-    def set(self,U_new):
-        assert(np.shape(U_new) == np.shape(self.grid))
+    def set_internal(self, U_new):
+        self.grid[:, self.Nghost : self.Nx + self.Nghost] = U_new
+
+    def set(self, U_new):
+        assert np.shape(U_new) == np.shape(self.grid)
         self.grid = U_new
 
-
-    def set_grid(self,U_new):
+    def set_grid(self, U_new):
         self.grid = U_new
 
     def internal_bounds(self):
-        return (self.Nghost, self.Nx+self.Nghost)
-    
-    def assert_variable_type(self,str):
-        assert(str == self.variables)
+        return (self.Nghost, self.Nx + self.Nghost)
 
+    def assert_variable_type(self, str):
+        assert str == self.variables
 
 
 class Grid2D:
@@ -113,28 +126,30 @@ class Grid2D:
         self.Nghost = Nghost
         self.num_vars = num_vars  # Number of variables (e.g., 3 for Euler equations)
         self.dx = (xlim[1] - xlim[0]) / (Nx - 1)
-        self.dy = (ylim[1]-ylim[0]) / (Ny-1)
-        self.x = np.linspace(xlim[0] - self.dx*Nghost, xlim[1] + self.dx*Nghost, Nx + 2*Nghost)
-        self.y = np.linspace(ylim[0] - self.dy*Nghost, ylim[1] + self.dy*Nghost, Ny + 2*Nghost)
+        self.dy = (ylim[1] - ylim[0]) / (Ny - 1)
+        self.x = np.linspace(
+            xlim[0] - self.dx * Nghost, xlim[1] + self.dx * Nghost, Nx + 2 * Nghost
+        )
+        self.y = np.linspace(
+            ylim[0] - self.dy * Nghost, ylim[1] + self.dy * Nghost, Ny + 2 * Nghost
+        )
 
-        
         self.meshX, self.meshY = np.meshgrid(self.x, self.y)
 
         self.ndim = 2
         # Internal x (no ghost cells)
-        self.x_int = self.x[self.Nghost:self.Nx + self.Nghost]
-        self.y_int = self.y[self.Nghost:self.Ny + self.Nghost]
+        self.x_int = self.x[self.Nghost : self.Nx + self.Nghost]
+        self.y_int = self.y[self.Nghost : self.Ny + self.Nghost]
 
         self.meshIntX, self.meshIntY = np.meshgrid(self.x_int, self.y_int)
 
         # Initialize the grid for multiple variables
-        self.grid = np.zeros((num_vars, Nx + 2*Nghost, Ny + 2*Nghost))
+        self.grid = np.zeros((num_vars, Nx + 2 * Nghost, Ny + 2 * Nghost))
         self.variables = "prim"
-
 
     def fill_grid(self, f):
         for var in range(self.num_vars):
-            #we can jsut fill ghost cells too, i don't think it matters we're just going to override anyways
+            # we can jsut fill ghost cells too, i don't think it matters we're just going to override anyways
             self.grid[var] = f(self.meshX, self.meshY, var)
 
     def plot(self):
@@ -143,67 +158,81 @@ class Grid2D:
         axs = axs.flatten()  # Flatten the 2x2 grid into a 1D array of axes
 
         # Titles for each subplot corresponding to each variable
-        titles = ['Density', 'UVel', 'VVel', 'Pressure']
+        titles = ["Density", "UVel", "VVel", "Pressure"]
 
         # Loop over the number of variables and plot each one using the 'plasma' colormap
         for i in range(self.num_vars):
-            pcm = axs[i].pcolormesh(self.meshX, self.meshY, self.grid[i].T, cmap='inferno', shading='auto')
-            fig.colorbar(pcm, ax=axs[i], orientation='vertical')  # Add a color bar to each subplot
+            pcm = axs[i].pcolormesh(
+                self.meshX, self.meshY, self.grid[i].T, cmap="inferno", shading="auto"
+            )
+            fig.colorbar(
+                pcm, ax=axs[i], orientation="vertical"
+            )  # Add a color bar to each subplot
             axs[i].set_title(titles[i])
-            axs[i].set_xlabel('X')
-            axs[i].set_ylabel('Y')
+            axs[i].set_xlabel("X")
+            axs[i].set_ylabel("Y")
 
         plt.tight_layout()  # Adjust layout to prevent overlap
         plt.show()  # Display the plot
 
-
     def apply_periodic_bcs(self):
         for var in range(self.num_vars):
-
             for i in range(self.Nghost):
-                self.grid[var, i, :] = self.grid[var, self.Nx + self.Nghost - (self.Nghost - i), :]
-                self.grid[var, self.Nx + self.Nghost + i, :] = self.grid[var, self.Nghost + i, :]
+                self.grid[var, i, :] = self.grid[
+                    var, self.Nx + self.Nghost - (self.Nghost - i), :
+                ]
+                self.grid[var, self.Nx + self.Nghost + i, :] = self.grid[
+                    var, self.Nghost + i, :
+                ]
 
             for j in range(self.Nghost):
-                self.grid[var, :, j] = self.grid[var, :, self.Ny + self.Nghost - (self.Nghost - j)]
-                self.grid[var, :, self.Ny + self.Nghost + j] = self.grid[var, :, self.Nghost + j]
-            
+                self.grid[var, :, j] = self.grid[
+                    var, :, self.Ny + self.Nghost - (self.Nghost - j)
+                ]
+                self.grid[var, :, self.Ny + self.Nghost + j] = self.grid[
+                    var, :, self.Nghost + j
+                ]
 
     def apply_zero_gradient_bcs(self):
-
         for var in range(self.num_vars):
             for ighost in range(self.Nghost):
                 self.grid[var, ighost, :] = self.grid[var, self.Nghost, :]
-                self.grid[var, self.Nx + self.Nghost + ighost, :] = self.grid[var, self.Nx + self.Nghost - 1, :]
+                self.grid[var, self.Nx + self.Nghost + ighost, :] = self.grid[
+                    var, self.Nx + self.Nghost - 1, :
+                ]
 
             for jghost in range(self.Nghost):
                 self.grid[var, :, jghost] = self.grid[var, :, self.Nghost]
-                self.grid[var, :, self.Ny + self.Nghost + jghost] = self.grid[var, :, self.Ny + self.Nghost - 1]
-
+                self.grid[var, :, self.Ny + self.Nghost + jghost] = self.grid[
+                    var, :, self.Ny + self.Nghost - 1
+                ]
 
     def return_internal_grid(self):
         pass
+
     def return_grid(self):
         pass
 
     def scratch_internal(self):
         pass
+
     def scratch(self):
         pass
 
+    def transform(self, f, name):
+        pass
 
-    def transform(self,f,name):
+    def set_internal(self, U_new):
         pass
-    def set_internal(self,U_new):
+
+    def set(self, U_new):
         pass
-        
-    def set(self,U_new):
-        pass
-    def set_grid(self,U_new):
+
+    def set_grid(self, U_new):
         pass
 
     def internal_bounds(self):
         pass
-    
-    def assert_variable_type(self,str):
+
+    def assert_variable_type(self, str):
         pass

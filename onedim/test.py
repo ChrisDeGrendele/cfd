@@ -24,6 +24,7 @@ p = np.where(x < x_center, p_left, p_right)
 E = p / ((gamma - 1) * rho) + 0.5 * u**2
 U = np.array([rho, rho * u, rho * E])
 
+
 # Function to compute flux
 def compute_flux(U):
     rho, m, E = U
@@ -31,7 +32,6 @@ def compute_flux(U):
     p = (gamma - 1) * (E - 0.5 * rho * u**2)
     F = np.array([m, m**2 / rho + p, (E + p) * u])
     return F
-
 
 
 # Lax-Friedrichs scheme
@@ -42,13 +42,10 @@ t_end = 0.2  # end time
 while t < t_end:
     F = compute_flux(U)
 
-    
     # Calculate sound speed and determine dt for CFL condition
     a = np.sqrt(gamma * p / rho)
     max_speed = np.max(np.abs(u) + a)
     dt = min(CFL * dx / max_speed, t_end - t)
-
-
 
     # Lax-Friedrichs update
     print("dt: ", dt)
@@ -56,13 +53,9 @@ while t < t_end:
 
     U[:, 1:-1] = 0.5 * (U[:, 2:] + U[:, :-2]) - dt / (2 * dx) * (F[:, 2:] - F[:, :-2])
 
-
-
     # Boundary conditions
     U[:, 0] = U[:, 1]
     U[:, -1] = U[:, -2]
-
-
 
     # Update time and derived quantities
     t += dt
@@ -70,8 +63,8 @@ while t < t_end:
     u = m / rho
     p = (gamma - 1) * (E - 0.5 * rho * u**2)
 
-    plt.plot(rho,linewidth=10)
-    plt.plot(u,'.')
+    plt.plot(rho, linewidth=10)
+    plt.plot(u, ".")
     plt.plot(p)
 
     plt.show()
@@ -79,12 +72,11 @@ while t < t_end:
     exit()
 
 
-
 # Plotting results
 plt.figure(figsize=(12, 8))
-plt.plot(x, rho, label='Density')
-plt.plot(x, u, label='Velocity')
-plt.plot(x, p, label='Pressure')
+plt.plot(x, rho, label="Density")
+plt.plot(x, u, label="Velocity")
+plt.plot(x, p, label="Pressure")
 plt.legend()
 plt.title(f"Sod Shock Tube Problem at t = {t:.2f} - Lax-Friedrichs Scheme")
 plt.xlabel("x")
