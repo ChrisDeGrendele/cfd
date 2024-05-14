@@ -29,7 +29,10 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pytest
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          if (Test-Path requirements.txt) { pip install -r requirements.txt }
+        else
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        fi
     - name: Run pytest
       run: pytest 
