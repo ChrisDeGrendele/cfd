@@ -1,6 +1,6 @@
 import numpy as np
-from weno5 import *
-import shockdetector as shock
+from onedim.weno5 import *
+import onedim.shockdetector as shock
 import sys
 
 sys.path.append("/Users/chris/Documents/github/gp-recipe/src_new")

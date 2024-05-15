@@ -1,4 +1,4 @@
-from constants import *
+from onedim.constants import *
 import numpy as np
 
 
@@ -26,7 +26,7 @@ def sod_shock_tube(a_x, a_var):
 
         else:
             print("Unea_xpected Variable")
-            ea_xit()
+            exit()
     return ics
 
 

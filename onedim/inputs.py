@@ -30,7 +30,7 @@ class Inputs:
         self.xlim = (self.x_lo, self.x_hi)
 
         # Time
-        self.time_steps = self.get_config_value(
+        self.nt = self.get_config_value(
             config, "Time", "time_steps", type_func=int, mandatory=False, default=np.inf
         )
         self.method = self.get_config_value(config, "Time", "method")
@@ -45,6 +45,8 @@ class Inputs:
             raise RuntimeError(
                 "Must supply either t_finish or time_steps in [Time] section of inputs file."
             )
+        self.cfl = self.get_config_value(config, "Time", "cfl", type_func=float)
+
 
         if self.t0 >= self.t_finish:
             raise RuntimeError("Initial time is >= to the final time.")

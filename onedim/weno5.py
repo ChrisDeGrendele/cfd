@@ -1,6 +1,6 @@
 # https://apps.dtic.mil/sti/tr/pdf/ADA390653.pdf
-from constants import *
-import euler
+from onedim.constants import *
+import onedim.euler as euler
 import numpy as np
 
 

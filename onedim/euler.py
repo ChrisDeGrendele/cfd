@@ -1,5 +1,5 @@
 import numpy as np
-from constants import *
+from onedim.constants import *
 
 
 def prim_to_cons(a_prim):

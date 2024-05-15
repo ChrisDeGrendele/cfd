@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from constants import *
+from onedim.constants import *
 
 
 class Grid1D:
@@ -10,7 +10,7 @@ class Grid1D:
         self.Nghost = Nghost
         self.num_vars = num_vars  # Number of variables (e.g., 3 for Euler equations)
         self.dx = (xlim[1] - xlim[0]) / (Nx - 1)
-        self.x = np.linspace(
+        self.x = np.linspace( 
             xlim[0] - self.dx * Nghost, xlim[1] + self.dx * Nghost, Nx + 2 * Nghost
         )
         self.ndim = 1

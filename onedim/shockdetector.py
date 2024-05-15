@@ -1,4 +1,4 @@
-from constants import *
+from onedim.constants import *
 import numpy as np
 import numpy as np
 
