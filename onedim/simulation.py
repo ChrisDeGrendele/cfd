@@ -21,19 +21,16 @@ class Simulation:
             self.inp.xlim, self.inp.nx, self.inp.numghosts, NUMQ
         )
 
-
         self.applyICS()
 
         self.applyBCS()
 
-
         self.t = self.inp.t0
         self.timestepNum = 0
 
-
  
         #-1 is no output. Always output ICs if we are outputting.
-        if self.output_freq >= 0:
+        if self.inp.output_freq >= 0:
             self.output()
 
     def run(self):
@@ -134,8 +131,10 @@ class Simulation:
 
     def applyICS(self):
 
-        if self.inp.ics == "sod":
+        if self.inp.ics == "sodshocktube":
             self.grid.fill_grid(ics.sod_shock_tube)
+        elif self.inp.ics == "shuoshershocktube":
+            self.grid.fill_grid(ics.shu_osher_shock_tube)
         else:
             raise RuntimeError("[FLUID] ICS not valid.")
 

@@ -49,7 +49,7 @@ class Grid1D:
     def apply_reflective_bcs(self):
         for var in range(self.num_vars):
             # Reflective BCs for left boundary
-            if var == UCOMP:  # Assuming UCOMP is the velocity component
+            if var == UCOMP: 
                 self.grid[var, : self.Nghost] = -self.grid[
                     var, self.Nghost : 2 * self.Nghost
                 ][::-1]
