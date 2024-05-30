@@ -8,6 +8,7 @@ import matplotlib.animation as animation
 from onedim.euler import prim_to_cons_var, flux_var,cons_to_prim
 
 from onedim.reconstruct import weno5_reconstruction
+from onedim.bcs import BoundaryConditions
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -17,13 +18,12 @@ class Simulation:
     def __init__(self, a_inputs):
         self.inp = a_inputs
 
-        self.grid = Grid1D(
-            self.inp.xlim, self.inp.nx, self.inp.numghosts, NUMQ
-        )
+        self.grid = Grid1D(self.inp.xlim, self.inp.nx, self.inp.numghosts, NUMQ)
+        self.bcs = BoundaryConditions(self.grid, self.inp.bc_lo, self.inp.bc_hi)
+
 
         self.applyICS()
-
-        self.applyBCS()
+        self.bcs.apply_bcs()
 
         self.t = self.inp.t0
         self.timestepNum = 0
@@ -40,7 +40,7 @@ class Simulation:
         while (self.t < self.inp.t_finish) and self.timestepNum < self.inp.nt:
             print("Timestep: ", self.timestepNum, "  Current time: ", self.t)
 
-            self.grid.apply_zero_gradient_bcs()
+            self.bcs.apply_bcs()
 
 
             uPrim = self.grid.grid
@@ -82,7 +82,7 @@ class Simulation:
             self.grid.set(U_new)
             self.grid.transform(cons_to_prim, "prim")
             
-            self.applyBCS()
+            self.bcs.apply_bcs()
 
 
             self.timestepNum += 1
@@ -138,15 +138,6 @@ class Simulation:
         else:
             raise RuntimeError("[FLUID] ICS not valid.")
 
-    def applyBCS(self):
-
-        if self.inp.bc_lo != self.inp.bc_hi:
-            raise RuntimeError("Need to implement non matching BCs")
-        
-        if self.inp.bc_lo == "zerograd":
-            self.grid.apply_zero_gradient_bcs()
-        else:
-            raise RuntimeError("[METHOD] BCS not valid.")
         
 
     def output(self):
@@ -169,7 +160,6 @@ class Simulation:
                 pressure = self.grid.grid[PCOMP, i]
                 f.write(f"{x:.8f}, {density:.8f}, {velocity:.8f}, {pressure:.8f}\n")
 
-        print(f"Output written to {output_filename}")
 
 
     def generate_movie(self):
@@ -189,7 +179,14 @@ class Simulation:
             density = data[:, 1]
             velocity = data[:, 2]
             pressure = data[:, 3]
-            
+
+            with open(file, 'r') as f:
+                lines = f.readlines()
+                time_line = lines[0]
+                time = float(time_line.split(':')[1].strip())
+
+            timestep = int(file.split('_')[-1].split('.')[0])
+
             axs[0].clear()
             axs[1].clear()
             axs[2].clear()
@@ -203,9 +200,7 @@ class Simulation:
             axs[2].scatter(x, pressure, c="black")
             axs[2].set_ylabel("Pressure")
 
-            timestep = int(file.split('_')[-1].split('.')[0])
-            axs[0].set_title(f"Time: {timestep * self.inp.cfl:.4f}")
-
+            axs[0].set_title(f"Time: {time:.4f}, Timestep: {timestep}")
         # Create an animation by updating the plot for each output file
         ani = animation.FuncAnimation(fig, update_plot, frames=output_files, repeat=False)
 

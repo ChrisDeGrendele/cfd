@@ -36,53 +36,29 @@ class Grid1D:
         plt.tight_layout()
         plt.show()
 
-    def apply_periodic_bcs(self):
-        for var in range(self.num_vars):
-            for i in range(self.Nghost):
-                self.grid[var, i] = self.grid[
-                    var, self.Nx + self.Nghost - (self.Nghost - i)
-                ]
-                self.grid[var, self.Nx + self.Nghost + i] = self.grid[
-                    var, self.Nghost + i
-                ]
 
-    def apply_reflective_bcs(self):
-        for var in range(self.num_vars):
-            # Reflective BCs for left boundary
-            if var == UCOMP: 
-                self.grid[var, : self.Nghost] = -self.grid[
-                    var, self.Nghost : 2 * self.Nghost
-                ][::-1]
-            else:  # For density and pressure, just copy the values from the first interior cells
-                self.grid[var, : self.Nghost] = self.grid[
-                    var, self.Nghost : 2 * self.Nghost
-                ]
+    # def apply_reflective_bcs(self):
+    #     for var in range(self.num_vars):
+    #         # Reflective BCs for left boundary
+    #         if var == UCOMP: 
+    #             self.grid[var, : self.Nghost] = -self.grid[
+    #                 var, self.Nghost : 2 * self.Nghost
+    #             ][::-1]
+    #         else:  # For density and pressure, just copy the values from the first interior cells
+    #             self.grid[var, : self.Nghost] = self.grid[
+    #                 var, self.Nghost : 2 * self.Nghost
+    #             ]
 
-            # Reflective BCs for right boundary
-            if var == UCOMP:
-                self.grid[var, self.Nx + self.Nghost :] = -self.grid[
-                    var, self.Nx : self.Nx + self.Nghost
-                ][::-1]
-            else:
-                self.grid[var, self.Nx + self.Nghost :] = self.grid[
-                    var, self.Nx : self.Nx + self.Nghost
-                ]
+    #         # Reflective BCs for right boundary
+    #         if var == UCOMP:
+    #             self.grid[var, self.Nx + self.Nghost :] = -self.grid[
+    #                 var, self.Nx : self.Nx + self.Nghost
+    #             ][::-1]
+    #         else:
+    #             self.grid[var, self.Nx + self.Nghost :] = self.grid[
+    #                 var, self.Nx : self.Nx + self.Nghost
+    #             ]
 
-    def apply_zero_gradient_bcs(self):
-        #
-
-        #     self.grid[var,0] = self.grid[var,1]
-        #     self.grid[var,self.Nx + self.Nghost] =  self.grid[var,self.Nx]
-
-        # self.grid[UCOMP,0] = 0
-        # self.grid[UCOMP,self.Nx + self.Nghost] =  0
-
-        for var in range(self.num_vars):
-            for ighost in range(self.Nghost):
-                self.grid[var, ighost] = self.grid[var, self.Nghost]
-                self.grid[var, self.Nx + self.Nghost + ighost] = self.grid[
-                    var, self.Nx + self.Nghost - 1
-                ]
 
     def return_internal_grid(self):
         return self.grid[:, self.Nghost : self.Nx + self.Nghost]
