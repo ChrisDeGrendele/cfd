@@ -41,7 +41,7 @@ jobs:
       run: pip install ruff
 
     - name: Run Ruff
-      run: ruff onedim/
+      run: ruff check onedim/
 
     - name: Run pytest
       run: pytest 
