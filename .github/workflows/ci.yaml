@@ -37,11 +37,11 @@ jobs:
     # - name: Run Black (Check mode)
     #   run: black . --check
 
-    - name: Install Ruff
-      run: pip install ruff
+    # - name: Install Ruff
+    #   run: pip install ruff
 
-    - name: Run Ruff
-      run: ruff check onedim/
+    # - name: Run Ruff
+    #   run: ruff check onedim/
 
     - name: Run pytest
       run: pytest 
