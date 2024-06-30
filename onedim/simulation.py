@@ -91,6 +91,7 @@ class Simulation:
             self.generate_movie()
     
         print("SUCCESS!")
+        return self.grid
 
     def plot(self):
         if not os.path.exists(self.inp.output_dir):

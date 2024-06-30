@@ -4,8 +4,7 @@ from configparser import NoSectionError, NoOptionError
 import os
 import sys
 
-# sys.path.append(os.path.abspath('../1D'))
-# from inputs import Inputs
+
 from onedim.inputs import Inputs
 
 INI_FILE_PATH = "tests/inputs.ini"

@@ -71,7 +71,7 @@ class Flux:
         # compute analytical flux at cell interface.
         fR = flux_var(primP[RHOCOMP], primP[UCOMP], primP[PCOMP])
 
-        U_new = np.ones_like(self.grid.grid) / 0  # np.nans_like lol
+        U_new = np.ones_like(self.grid.grid) #/ 0  # np.nans_like lol
         LFFlux = np.zeros_like(self.grid.grid)
 
         # Computes LF Flux

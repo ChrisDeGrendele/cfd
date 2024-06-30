@@ -37,29 +37,6 @@ class Grid1D:
         plt.show()
 
 
-    # def apply_reflective_bcs(self):
-    #     for var in range(self.num_vars):
-    #         # Reflective BCs for left boundary
-    #         if var == UCOMP: 
-    #             self.grid[var, : self.Nghost] = -self.grid[
-    #                 var, self.Nghost : 2 * self.Nghost
-    #             ][::-1]
-    #         else:  # For density and pressure, just copy the values from the first interior cells
-    #             self.grid[var, : self.Nghost] = self.grid[
-    #                 var, self.Nghost : 2 * self.Nghost
-    #             ]
-
-    #         # Reflective BCs for right boundary
-    #         if var == UCOMP:
-    #             self.grid[var, self.Nx + self.Nghost :] = -self.grid[
-    #                 var, self.Nx : self.Nx + self.Nghost
-    #             ][::-1]
-    #         else:
-    #             self.grid[var, self.Nx + self.Nghost :] = self.grid[
-    #                 var, self.Nx : self.Nx + self.Nghost
-    #             ]
-
-
     def return_internal_grid(self):
         return self.grid[:, self.Nghost : self.Nx + self.Nghost]
 
