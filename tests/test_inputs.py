@@ -14,17 +14,16 @@ INI_FILE_PATH = "tests/inputs.ini"
 # Basic test for verifying correct inputs handling
 def test_correct_inputs():
     inputs = Inputs(INI_FILE_PATH)
-    assert inputs.nx == 100
+    assert inputs.nx == 500
     assert inputs.numghosts == 3
     assert inputs.xlim == (0, 1)
-    assert inputs.time_steps == 100
     assert inputs.method == "RK1"
     assert inputs.t0 == 0
     assert inputs.t_finish == 0.1
-    assert inputs.ics == "sod"
+    assert inputs.ics == "sodshocktube"
     assert inputs.flux == "weno5"
-    assert inputs.bc_lo == "zerograd"
-    assert inputs.bc_hi == "zerograd"
+    assert inputs.bc_lo == "neumann"
+    assert inputs.bc_hi == "neumann"
     assert inputs.output_freq == 1
     assert inputs.make_movie is True
 

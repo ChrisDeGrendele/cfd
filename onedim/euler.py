@@ -87,6 +87,11 @@ def flux_var(rho, u, P):
     return np.array([rhoFlux, uFlux, pFlux])
 
 
+# def keep_flux(rho, u, P):
+
+    
+
+
 def get_max_speed(a_grid):
     if a_grid.variables == "prim":
         return np.max(a_grid.grid[UCOMP])

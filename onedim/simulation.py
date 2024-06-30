@@ -4,6 +4,8 @@ import onedim.ics as ics
 import glob
 import matplotlib.animation as animation
 
+from onedim.flux import Flux
+
 
 from onedim.euler import prim_to_cons_var, flux_var,cons_to_prim
 
@@ -20,6 +22,7 @@ class Simulation:
 
         self.grid = Grid1D(self.inp.xlim, self.inp.nx, self.inp.numghosts, NUMQ)
         self.bcs = BoundaryConditions(self.grid, self.inp.bc_lo, self.inp.bc_hi)
+        self.flux = Flux(self.grid, self.inp.flux)
 
 
         self.applyICS()
@@ -43,40 +46,21 @@ class Simulation:
             self.bcs.apply_bcs()
 
 
-            uPrim = self.grid.grid
             self.grid.assert_variable_type("prim")
             a = np.sqrt(gamma * self.grid.grid[PCOMP] / self.grid.grid[RHOCOMP])
             max_speed = np.max(np.abs(self.grid.grid[UCOMP]) + a)
             dt = min(self.inp.cfl * self.grid.dx / max_speed, self.inp.t_finish - self.t)
-
-            # reconstruct primitive at i+1/2 cell face
-            primP = weno5_reconstruction(self.grid.grid, self.grid)
-            # primP = SEDAS_apriori(grid.grid, grid)
-
-            # conservative variables at cell interface.
-            mass, mom, energy = prim_to_cons_var(primP[RHOCOMP], primP[UCOMP], primP[PCOMP])
-            consP = np.array([mass, mom, energy])
-
-            # compute analytical flux at cell interface.
-            fR = flux_var(primP[RHOCOMP], primP[UCOMP], primP[PCOMP])
-
+            
             U_new = np.ones_like(self.grid.grid) / 0  # np.nans_like lol
-            LFFlux = np.zeros_like(self.grid.grid)
 
-            # Computes LF Flux
-            # Loop through all the cells except for the outermost ghost cells.
-            for i in range(1, len(self.grid.x) - 1):
-                for icomp in range(NUMQ):
-                    # Compute the Lax-Friedrichs flux at i+1/2 and i-1/2 interfaces
-                    LFFlux[icomp, i] = 0.5 * (
-                        fR[icomp, i + 1] + fR[icomp, i]
-                    ) - 0.5 * max_speed * (consP[icomp, i + 1] - consP[icomp, i])
+            #returns numerical flux and conservative varaibles at interface
+            consP, numericalFlux = self.flux.getFlux()
 
             # Update.
             for i in range(self.grid.Nghost, self.grid.Nx + self.grid.Nghost):
                 for icomp in range(NUMQ):
                     U_new[icomp, i] = consP[icomp, i] - (dt / self.grid.dx) * (
-                        LFFlux[icomp, i] - LFFlux[icomp, i - 1]
+                        numericalFlux[icomp, i] - numericalFlux[icomp, i - 1]
                     )
 
             self.grid.set(U_new)
